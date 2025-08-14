@@ -1,0 +1,12 @@
+[package]
+name = "app"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+sqlx = { version = "0.8.6", features = ["runtime-tokio-rustls", "uuid", "chrono", "macros", "postgres", "migrate"] }
+tokio = { version = "1", features = ["full"] }
+axum = "0.8.4"
+anyhow = "1.0.99"
+
+[dev-dependencies]
