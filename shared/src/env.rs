@@ -22,7 +22,6 @@ pub enum Environment {
 ///  # Returns
 ///    環境を示す Enum
 pub fn which() -> Environment {
-
     #[cfg(debug_assertions)]
     let default_env = Environment::Development;
     #[cfg(not(debug_assertions))]
@@ -36,7 +35,6 @@ pub fn which() -> Environment {
 
 #[test]
 pub fn test_which_1() {
-
     unsafe {
         std::env::set_var("ENV", "Production");
 
@@ -47,7 +45,6 @@ pub fn test_which_1() {
 
 #[test]
 pub fn test_which_2() {
-
     unsafe {
         std::env::set_var("ENV", "Development");
 
@@ -58,7 +55,6 @@ pub fn test_which_2() {
 
 #[test]
 pub fn test_which_3() {
-
     let env = which();
     assert_eq!(env, Environment::Development)
 }

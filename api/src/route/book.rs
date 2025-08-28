@@ -1,6 +1,9 @@
-use axum::{routing::{get, post}, Router};
+use crate::handler::book::{register_book, show_book, show_book_list};
+use axum::{
+    Router,
+    routing::{get, post},
+};
 use registry::AppRegistry;
-use crate::handler::book::{register_book, show_book_list, show_book};
 
 pub fn build_book_routers() -> Router<AppRegistry> {
     let book_routers = Router::new()
@@ -10,4 +13,3 @@ pub fn build_book_routers() -> Router<AppRegistry> {
 
     Router::new().nest("/books", book_routers)
 }
-

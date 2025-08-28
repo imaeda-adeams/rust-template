@@ -1,7 +1,7 @@
 use axum::{
+    Json,
     extract::{Path, State},
     http::StatusCode,
-    Json
 };
 use kernel::model::id::BookId;
 use registry::AppRegistry;
@@ -20,7 +20,7 @@ pub async fn register_book(
         .map(|_| StatusCode::CREATED)
 }
 
-pub async fn show_book_list (
+pub async fn show_book_list(
     State(registry): State<AppRegistry>,
 ) -> Result<Json<Vec<BookResponse>>, AppError> {
     registry

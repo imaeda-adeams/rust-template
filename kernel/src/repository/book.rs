@@ -1,7 +1,7 @@
-use shared::error::AppResult;
 use async_trait::async_trait;
+use shared::error::AppResult;
 
-use crate::model::book::{event::CreateBook, Book};
+use crate::model::book::{Book, event::CreateBook};
 use crate::model::id::BookId;
 
 #[async_trait]

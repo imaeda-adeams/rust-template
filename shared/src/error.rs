@@ -1,5 +1,5 @@
-use axum::{http::StatusCode, response::IntoResponse};
 use axum::response::Response;
+use axum::{http::StatusCode, response::IntoResponse};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -36,8 +36,7 @@ pub enum AppError {
 
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
-        let staus_code =
-        match self {
+        let staus_code = match self {
             AppError::UnprocessableEntity(_) => StatusCode::UNPROCESSABLE_ENTITY,
             AppError::EntityNotFound(_) => StatusCode::NOT_FOUND,
             AppError::ValidationError(_) => StatusCode::BAD_REQUEST,
@@ -46,8 +45,7 @@ impl IntoResponse for AppError {
             AppError::UnauthenticatedError => StatusCode::FORBIDDEN,
             AppError::ForbiddenOperationError => StatusCode::FORBIDDEN,
             AppError::UnauthorizedError => StatusCode::UNAUTHORIZED,
-            e @ (
-                AppError::TransactionError(_)
+            e @ (AppError::TransactionError(_)
             | AppError::SpecificOperationError(_)
             | AppError::NoRowsAffectedError(_)
             | AppError::KeyValueStoreError(_)

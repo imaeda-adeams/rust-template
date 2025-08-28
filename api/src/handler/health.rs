@@ -6,7 +6,6 @@ pub async fn health_check() -> StatusCode {
 }
 
 pub async fn health_check_db(State(registry): State<AppRegistry>) -> StatusCode {
-
     if registry.health_check_repository().check_db().await {
         StatusCode::OK
     } else {
