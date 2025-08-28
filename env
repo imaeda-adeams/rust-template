@@ -1,0 +1,12 @@
+set -x DATABASE_HOST "localhost"
+set -x DATABASE_PORT "5432"
+set -x DATABASE_USER "app"
+set -x DATABASE_PASSWORD "passwd"
+set -x DATABASE_DATABASE "app"
+set -x DATABASE_URL "postgres://app:passwd@localhost:5432/app?sslmode=disable"
+
+set -x REDIS_HOST "localhost"
+set -x REDIS_PORT "6379"
+
+set -x AUTH_TTL "86400"
+
