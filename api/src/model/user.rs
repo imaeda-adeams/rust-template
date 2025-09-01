@@ -149,3 +149,19 @@ impl From<UpdateUserRoleRequestWithUserId> for UpdateUserRole {
         }
     }
 }
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BookOwner {
+    pub id: UserId,
+    pub name: String,
+}
+
+impl From<kernel::model::user::BookOwner> for BookOwner {
+    fn from(book_owner: kernel::model::user::BookOwner) -> Self {
+        Self {
+            id: book_owner.id,
+            name: book_owner.name,
+        }
+    }   
+}
