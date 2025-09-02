@@ -1,11 +1,12 @@
+use chrono::DateTime;
 use derive_new::new;
 use garde::Validate;
-use kernel::model::book::{Book, event::CreateBook, BookListOptions};
-use kernel::model::id::{BookId, UserId};
+use kernel::model::book::{Book, event::CreateBook, BookListOptions, Checkout};
+use kernel::model::id::{BookId, CheckoutId, UserId};
 use serde::{Deserialize, Serialize};
 use kernel::model::book::event::UpdateBook;
 use kernel::model::list::PaginatedList;
-use crate::model::user::BookOwner;
+use crate::model::user::{BookOwner, CheckoutUser};
 
 #[derive(Debug, Deserialize, Validate)]
 #[serde(rename_all = "camelCase")]
@@ -119,7 +120,8 @@ pub struct BookResponse {
     pub author: String,
     pub isbn: String,
     pub description: String,
-    pub owner: BookOwner
+    pub owner: BookOwner,
+    pub checkout: Option<BookCheckoutResponse>,
 }
 
 impl From<Book> for BookResponse {
@@ -131,6 +133,7 @@ impl From<Book> for BookResponse {
             isbn,
             description,
             owner,
+            checkout,
         } = value;
         Self {
             book_id,
@@ -139,6 +142,7 @@ impl From<Book> for BookResponse {
             isbn,
             description,
             owner: owner.into(),
+            checkout: checkout.map(BookCheckoutResponse::from),
         }
     }
 }
@@ -160,6 +164,25 @@ impl From<PaginatedList<Book>> for PaginatedBookResponse {
             limit: value.limit,
             offset: value.offset,
             books: value.items.into_iter().map(BookResponse::from).collect(),
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BookCheckoutResponse {
+    pub checkout_id: CheckoutId,
+    pub checked_out_by: CheckoutUser,
+    pub checked_out_at: DateTime<chrono::Utc>,
+}
+
+impl From<Checkout> for BookCheckoutResponse {
+
+    fn from(value: Checkout) -> Self {
+        Self {
+            checkout_id: value.checkout_id,
+            checked_out_by: value.checked_out_by.into(),
+            checked_out_at: value.checked_out_at,
         }
     }
 }

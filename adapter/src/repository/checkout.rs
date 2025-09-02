@@ -56,7 +56,7 @@ impl CheckoutRepository for CheckoutRepositoryImpl {
                         event.book_id
                     )));
                 }
-                _ => {AppResult::Ok(());}
+                _ => { AppResult::Ok(())?;}
             }
         }
 
@@ -115,20 +115,20 @@ impl CheckoutRepository for CheckoutRepositoryImpl {
                     return Err(AppError::EntityNotFound(format!(
                         "Book with id {} not found",
                         event.book_id
-                    )));
+                    )))
                 }
                 Some(CheckoutStateRow {
                          checkout_id: Some(c),
                          user_id: Some(u),
                          ..
-                     }) if (c, u) != (event.checkout_id, event.returned_by) => {
+                }) if (c, u) != (event.checkout_id, event.returned_by) => {
                     return Err(AppError::UnprocessableEntity(format!(
                         "Checkout with id {} is not checked out by user with id {} for book with id {}",
                         event.checkout_id, event.returned_by, event.book_id
-                    )));
+                    )))
                 }
-                _ => {AppResult::Ok(());}
-            };
+                _ => {}
+            }
         }
 
         let res = sqlx::query!(
@@ -188,7 +188,7 @@ impl CheckoutRepository for CheckoutRepositoryImpl {
                 b.isbn
             FROM checkouts AS c
             INNER JOIN books AS b USING(book_id)
-            ORDER BY c.checked_out_at ASC;
+            ORDER BY c.checked_out_at;
         "#
         )
             .fetch_all(self.pool.inner_ref())
@@ -213,7 +213,7 @@ impl CheckoutRepository for CheckoutRepositoryImpl {
             FROM checkouts AS c
             INNER JOIN books AS b USING(book_id)
             WHERE c.user_id = $1
-            ORDER BY c.checked_out_at ASC;
+            ORDER BY c.checked_out_at;
             "#,
             user_id as _
         )
@@ -262,11 +262,12 @@ impl CheckoutRepository for CheckoutRepositoryImpl {
 }
 
 impl CheckoutRepositoryImpl {
+
     async fn set_transaction_serializable(
         &self,
         tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     ) -> AppResult<()> {
-        sqlx::query!("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;")
+        sqlx::query!("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE")
             .execute(&mut **tx)
             .await
             .map_err(AppError::SpecificOperationError)?;

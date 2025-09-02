@@ -1,13 +1,14 @@
-use crate::database::model::book::{BookRow, PaginatedBookRow};
+use crate::database::model::book::{BookCheckoutRow, BookRow, PaginatedBookRow};
 use crate::database::ConnectionPool;
 use async_trait::async_trait;
 use derive_new::new;
 use kernel::model::book::event::{DeleteBook, UpdateBook};
-use kernel::model::book::{event::CreateBook, Book, BookListOptions};
+use kernel::model::book::{event::CreateBook, Book, BookListOptions, Checkout};
 use kernel::model::id::{BookId, UserId};
 use kernel::model::list::PaginatedList;
 use kernel::repository::book::BookRepository;
 use shared::error::{AppError, AppResult};
+use std::collections::HashMap;
 
 #[derive(new)]
 pub struct BookRepositoryImpl {
@@ -57,7 +58,10 @@ impl BookRepository for BookRepositoryImpl {
 
         let total = rows.first().map(|row| row.total).unwrap_or(0);
 
-        let book_ids: Vec<BookId> = rows.into_iter().map(|row| row.book_id).collect::<Vec<BookId>>();
+        let book_ids: Vec<BookId> = rows
+            .into_iter()
+            .map(|row| row.book_id)
+            .collect::<Vec<BookId>>();
 
         let rows: Vec<BookRow> = sqlx::query_as!(
             BookRow,
@@ -77,11 +81,19 @@ impl BookRepository for BookRepositoryImpl {
             "#,
             &book_ids as _
         )
-            .fetch_all(self.pool.inner_ref())
+        .fetch_all(self.pool.inner_ref())
         .await
-            .map_err(AppError::SpecificOperationError)?;
+        .map_err(AppError::SpecificOperationError)?;
 
-        let items = rows.into_iter().map(Book::from).collect::<Vec<Book>>();
+        let book_ids = rows.iter().map(|book| book.book_id).collect::<Vec<_>>();
+        let mut checkouts = self.find_checkouts(&book_ids).await?;
+        let items = rows
+            .into_iter()
+            .map(|row| {
+                let checkout = checkouts.remove(&row.book_id);
+                row.into_book(checkout)
+            })
+            .collect();
 
         Ok(PaginatedList {
             total,
@@ -113,11 +125,19 @@ impl BookRepository for BookRepositoryImpl {
         .await
         .map_err(AppError::SpecificOperationError)?;
 
-        Ok(row.map(Book::from))
+        match row {
+            Some(r) => {
+                let checkout = self
+                    .find_checkouts(&[r.book_id])
+                    .await?
+                    .remove(&r.book_id);
+                Ok(Some(r.into_book(checkout)))
+            }
+            None => Ok(None),
+        }
     }
 
     async fn update(&self, event: UpdateBook) -> AppResult<()> {
-
         let res = sqlx::query!(
             r#"
                 UPDATE books
@@ -136,21 +156,20 @@ impl BookRepository for BookRepositoryImpl {
             event.book_id as _,
             event.requested_user as _
         )
-            .execute(self.pool.inner_ref())
-            .await
-            .map_err(AppError::SpecificOperationError)?;
+        .execute(self.pool.inner_ref())
+        .await
+        .map_err(AppError::SpecificOperationError)?;
 
         if res.rows_affected() < 1 {
-            return Err(AppError::EntityNotFound(
-                format!("Book with id {} not found", event.book_id),
-            ));
-
+            return Err(AppError::EntityNotFound(format!(
+                "Book with id {} not found",
+                event.book_id
+            )));
         }
         Ok(())
     }
 
     async fn delete(&self, event: DeleteBook) -> AppResult<()> {
-
         let res = sqlx::query!(
             r#"
                 DELETE FROM books
@@ -160,37 +179,63 @@ impl BookRepository for BookRepositoryImpl {
             event.book_id as _,
             event.requested_user as _
         )
-            .execute(self.pool.inner_ref())
-            .await
-            .map_err(AppError::SpecificOperationError)?;
+        .execute(self.pool.inner_ref())
+        .await
+        .map_err(AppError::SpecificOperationError)?;
 
         if res.rows_affected() < 1 {
-            return Err(AppError::EntityNotFound(
-                format!("Book with id {} not found", event.book_id),
-            ));
+            return Err(AppError::EntityNotFound(format!(
+                "Book with id {} not found",
+                event.book_id
+            )));
         }
 
         Ok(())
     }
 }
 
+impl BookRepositoryImpl {
+    async fn find_checkouts(&self, book_ids: &[BookId]) -> AppResult<HashMap<BookId, Checkout>> {
+        let res = sqlx::query_as!(
+            BookCheckoutRow,
+            r#"
+                SELECT
+                    c.checkout_id AS checkout_id,
+                    c.book_id AS book_id,
+                    u.user_id AS user_id,
+                    u.name AS user_name,
+                    c.checked_out_at AS checked_out_at
+                FROM checkouts AS c
+                INNER JOIN users AS u USING(user_id)
+                WHERE book_id = ANY($1);
+            "#,
+            book_ids as _
+        )
+        .fetch_all(self.pool.inner_ref())
+        .await
+        .map_err(AppError::SpecificOperationError)?
+        .into_iter()
+        .map(|checkout| (checkout.book_id, Checkout::from(checkout)))
+        .collect();
+
+        Ok(res)
+    }
+}
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::repository::user::UserRepositoryImpl;
-    use kernel::{
-        model::user::event::CreateUser,
-        repository::user::UserRepository,
-    };
+    use kernel::{model::user::event::CreateUser, repository::user::UserRepository};
 
     #[sqlx::test]
     async fn test_register_book(pool: sqlx::PgPool) -> anyhow::Result<()> {
-
         sqlx::query!(
             r#"
             INSERT INTO roles(name) VALUES ('Admin'), ('User');
             "#
-        ).execute(&pool).await?;
+        )
+        .execute(&pool)
+        .await?;
 
         let user_repo = UserRepositoryImpl::new(ConnectionPool::new(pool.clone()));
 
@@ -213,7 +258,7 @@ mod tests {
 
         repo.create(book, user.user_id).await?;
 
-        let options = BookListOptions{
+        let options = BookListOptions {
             limit: 10,
             offset: 0,
         };
@@ -230,7 +275,8 @@ mod tests {
             author,
             isbn,
             description,
-            owner
+            owner,
+            ..
         } = res.unwrap();
         assert_eq!(book_id, book_id);
         assert_eq!(title, "Test Title");
