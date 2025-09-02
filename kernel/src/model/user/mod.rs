@@ -4,7 +4,7 @@ pub mod event;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct User {
-    pub id: UserId,
+    pub user_id: UserId,
     pub name: String,
     pub email: String,
     pub role: Role,
@@ -12,12 +12,12 @@ pub struct User {
 
 #[derive(Debug)]
 pub struct BookOwner {
-    pub id: UserId,
+    pub user_id: UserId,
     pub name: String,
 }
 
 #[derive(Debug)]
 pub struct CheckoutUser {
-    pub id: UserId,
+    pub user_id: UserId,
     pub name: String,
 }

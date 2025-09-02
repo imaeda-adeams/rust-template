@@ -9,7 +9,7 @@ pub struct CreateBook {
 
 #[derive(Debug)]
 pub struct UpdateBook {
-    pub id: BookId,
+    pub book_id: BookId,
     pub title: String,
     pub author: String,
     pub isbn: String,
@@ -19,6 +19,6 @@ pub struct UpdateBook {
 
 #[derive(Debug)]
 pub struct DeleteBook {
-    pub id: BookId,
+    pub book_id: BookId,
     pub requested_user: UserId
 }

@@ -5,7 +5,7 @@ pub mod event;
 
 #[derive(Debug)]
 pub struct Book {
-    pub id: BookId,
+    pub book_id: BookId,
     pub title: String,
     pub author: String,
     pub isbn: String,

@@ -11,8 +11,8 @@ pub struct AuthorizedUser {
 }
 
 impl AuthorizedUser {
-    pub fn id(&self) -> UserId {
-        self.user.id
+    pub fn user_id(&self) -> UserId {
+        self.user.user_id
     }
 
     pub fn is_admin(&self) -> bool {

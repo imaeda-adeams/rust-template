@@ -25,15 +25,15 @@ impl UserRepository for UserRepositoryImpl {
             UserRow,
             r#"
             SELECT 
-                u.id,
+                u.user_id,
                 u.name,
                 u.email,
                 r.name as role_name,
                 u.created_at,
                 u.updated_at
             FROM users AS u 
-            INNER JOIN roles AS r ON u.role_id = r.id
-            WHERE u.id = $1
+            INNER JOIN roles AS r ON u.role_id = r.role_id
+            WHERE u.user_id = $1
             "#,
             current_user_id as _
         )
@@ -52,14 +52,14 @@ impl UserRepository for UserRepositoryImpl {
             UserRow,
             r#"
             SELECT 
-                u.id,
+                u.user_id,
                 u.name,
                 u.email,
                 r.name as role_name,
                 u.created_at,
                 u.updated_at
             FROM users AS u 
-            INNER JOIN roles AS r ON u.role_id = r.id
+            INNER JOIN roles AS r USING (role_id)
             ORDER BY u.created_at DESC;
             "#
         )
@@ -81,8 +81,8 @@ impl UserRepository for UserRepositoryImpl {
 
         let res = sqlx::query!(
             r#"
-            INSERT INTO users(id, name, email, password_hash, role_id)
-            SELECT $1, $2, $3, $4, id FROM roles WHERE name = $5;
+            INSERT INTO users(user_id, name, email, password_hash, role_id)
+            SELECT $1, $2, $3, $4, role_id FROM roles WHERE name = $5;
             "#,
             user_id as _,
             event.name,
@@ -101,7 +101,7 @@ impl UserRepository for UserRepositoryImpl {
         }
 
         Ok(User {
-            id: user_id,
+            user_id,
             name: event.name,
             email: event.email,
             role,
@@ -114,7 +114,7 @@ impl UserRepository for UserRepositoryImpl {
 
         let original_password_hash = sqlx::query!(
             r#"
-            SELECT password_hash FROM users WHERE id = $1;
+            SELECT password_hash FROM users WHERE user_id = $1;
             "#,
             event.user_id as _
         )
@@ -129,7 +129,7 @@ impl UserRepository for UserRepositoryImpl {
 
         sqlx::query!(
             r#"
-            UPDATE users SET password_hash = $1 WHERE id = $2;
+            UPDATE users SET password_hash = $1 WHERE user_id = $2;
             "#,
             new_password_hash,
             event.user_id as _
@@ -150,8 +150,8 @@ impl UserRepository for UserRepositoryImpl {
             r#"
             UPDATE users
             SET role_id = (
-                SELECT id FROM roles WHERE name = $1
-            ) WHERE id = $2
+                SELECT role_id FROM roles WHERE name = $1
+            ) WHERE user_id = $2
             "#,
             event.role.as_ref(),
             event.user_id as _,
@@ -173,7 +173,7 @@ impl UserRepository for UserRepositoryImpl {
 
         let res = sqlx::query!(
             r#"
-            DELETE FROM users WHERE id = $1;
+            DELETE FROM users WHERE user_id = $1;
             "#,
             event.user_id as _
         )

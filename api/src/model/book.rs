@@ -64,7 +64,7 @@ impl From<UpdateBookRequestWithIds> for UpdateBook {
     fn from(value: UpdateBookRequestWithIds) -> Self {
 
         let UpdateBookRequestWithIds(
-            id,
+            book_id,
             user_id,
             UpdateBookRequest {
                 title,
@@ -75,7 +75,7 @@ impl From<UpdateBookRequestWithIds> for UpdateBook {
         ) = value;
 
         UpdateBook {
-            id,
+            book_id,
             title,
             author,
             isbn,
@@ -114,7 +114,7 @@ impl From<BookListQuery> for BookListOptions {
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BookResponse {
-    pub id: BookId,
+    pub book_id: BookId,
     pub title: String,
     pub author: String,
     pub isbn: String,
@@ -125,7 +125,7 @@ pub struct BookResponse {
 impl From<Book> for BookResponse {
     fn from(value: Book) -> Self {
         let Book {
-            id,
+            book_id,
             title,
             author,
             isbn,
@@ -133,7 +133,7 @@ impl From<Book> for BookResponse {
             owner,
         } = value;
         Self {
-            id,
+            book_id,
             title,
             author,
             isbn,

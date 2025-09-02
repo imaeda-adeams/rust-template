@@ -43,7 +43,7 @@ impl BookRepository for BookRepositoryImpl {
             r#"
                 SELECT
                     COUNT(*) OVER() AS "total!",
-                    b.id AS id
+                    b.book_id AS book_id
                 FROM books AS b
                 ORDER BY b.created_at DESC
                 LIMIT $1 OFFSET $2
@@ -57,22 +57,22 @@ impl BookRepository for BookRepositoryImpl {
 
         let total = rows.first().map(|row| row.total).unwrap_or(0);
 
-        let book_ids: Vec<BookId> = rows.into_iter().map(|row| row.id).collect::<Vec<BookId>>();
+        let book_ids: Vec<BookId> = rows.into_iter().map(|row| row.book_id).collect::<Vec<BookId>>();
 
         let rows: Vec<BookRow> = sqlx::query_as!(
             BookRow,
             r#"
                 SELECT
-                 b.id AS id,
+                 b.book_id AS book_id,
                  b.title AS title,
                  b.author AS author,
                  b.isbn AS isbn,
                  b.description AS description,
-                 u.id AS owned_by,
+                 u.user_id AS owned_by,
                  u.name AS owner_name
                 FROM books AS b
-                INNER JOIN users as u ON u.id = b.user_id
-                WHERE b.id IN (SELECT * FROM UNNEST($1::uuid[]))
+                INNER JOIN users as u ON u.user_id = b.user_id
+                WHERE b.book_id IN (SELECT * FROM UNNEST($1::uuid[]))
                 ORDER BY b.created_at DESC
             "#,
             &book_ids as _
@@ -96,16 +96,16 @@ impl BookRepository for BookRepositoryImpl {
             BookRow,
             r#"
                 SELECT
-                 b.id AS id,
+                 b.book_id AS book_id,
                  b.title AS title,
                  b.author AS author,
                  b.isbn AS isbn,
                  b.description AS description,
-                 u.id AS owned_by,
+                 u.user_id AS owned_by,
                  u.name AS owner_name
                 FROM books AS b
-                INNER JOIN users as u ON u.id = b.user_id
-                WHERE b.id = $1
+                INNER JOIN users as u ON u.user_id = b.user_id
+                WHERE b.book_id = $1
             "#,
             id as _
         )
@@ -126,14 +126,14 @@ impl BookRepository for BookRepositoryImpl {
                     author = $2,
                     isbn = $3,
                     description = $4
-                WHERE id = $5
+                WHERE book_id = $5
                 AND user_id = $6
             "#,
             event.title,
             event.author,
             event.isbn,
             event.description,
-            event.id as _,
+            event.book_id as _,
             event.requested_user as _
         )
             .execute(self.pool.inner_ref())
@@ -142,7 +142,7 @@ impl BookRepository for BookRepositoryImpl {
 
         if res.rows_affected() < 1 {
             return Err(AppError::EntityNotFound(
-                format!("Book with id {} not found", event.id),
+                format!("Book with id {} not found", event.book_id),
             ));
 
         }
@@ -154,10 +154,10 @@ impl BookRepository for BookRepositoryImpl {
         let res = sqlx::query!(
             r#"
                 DELETE FROM books
-                WHERE id = $1
+                WHERE book_id = $1
                 AND user_id = $2
             "#,
-            event.id as _,
+            event.book_id as _,
             event.requested_user as _
         )
             .execute(self.pool.inner_ref())
@@ -166,7 +166,7 @@ impl BookRepository for BookRepositoryImpl {
 
         if res.rows_affected() < 1 {
             return Err(AppError::EntityNotFound(
-                format!("Book with id {} not found", event.id),
+                format!("Book with id {} not found", event.book_id),
             ));
         }
 
@@ -211,7 +211,7 @@ mod tests {
             description: "Test Description".into(),
         };
 
-        repo.create(book, user.id).await?;
+        repo.create(book, user.user_id).await?;
 
         let options = BookListOptions{
             limit: 10,
@@ -220,19 +220,19 @@ mod tests {
         let res = repo.find_all(options).await?;
         assert_eq!(res.items.len(), 1);
 
-        let book_id = res.items[0].id;
+        let book_id = res.items[0].book_id;
         let res = repo.find_by_id(book_id).await?;
         assert!(res.is_some());
 
         let Book {
-            id,
+            book_id,
             title,
             author,
             isbn,
             description,
             owner
         } = res.unwrap();
-        assert_eq!(id, book_id);
+        assert_eq!(book_id, book_id);
         assert_eq!(title, "Test Title");
         assert_eq!(author, "Test Author");
         assert_eq!(isbn, "Test ISBN");

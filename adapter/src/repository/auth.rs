@@ -41,7 +41,7 @@ impl AuthRepository for AuthRepositoryImpl {
         let user_item = sqlx::query_as!(
             UserItem,
             r#"
-                SELECT id, password_hash FROM users
+                SELECT user_id, password_hash FROM users
                 WHERE email = $1;
             "#,
             email
@@ -53,7 +53,7 @@ impl AuthRepository for AuthRepositoryImpl {
         if !valid {
             return Err(AppError::UnauthenticatedError);
         }
-        Ok(user_item.id)
+        Ok(user_item.user_id)
     }
 
     async fn create_token(&self, event: CreateToken) -> AppResult<AccessToken> {

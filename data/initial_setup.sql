@@ -11,7 +11,7 @@ SELECT
     'Eleazar Fig',
     'eleazar.fig@example.com',
     '$2b$12$GFf.eB7OpIcB3hpCr/JhoOOVPHQ0YE9oLnDA0KyHq7oGBvAFospLK',
-    r.id
+    r.role_id
 FROM
     roles as r
 WHERE

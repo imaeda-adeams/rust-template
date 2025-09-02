@@ -3,7 +3,7 @@ use kernel::model::id::{BookId, UserId};
 use kernel::model::user::BookOwner;
 
 pub struct BookRow {
-    pub id: BookId,
+    pub book_id: BookId,
     pub title: String,
     pub author: String,
     pub isbn: String,
@@ -15,13 +15,13 @@ pub struct BookRow {
 impl From<BookRow> for Book {
     fn from(row: BookRow) -> Self {
         Self {
-            id: row.id,
+            book_id: row.book_id,
             title: row.title,
             author: row.author,
             isbn: row.isbn,
             description: row.description,
             owner: BookOwner {
-                id: row.owned_by,
+                user_id: row.owned_by,
                 name: row.owner_name,
             },
         }
@@ -30,5 +30,5 @@ impl From<BookRow> for Book {
 
 pub struct PaginatedBookRow {
     pub total: i64,
-    pub id: BookId,
+    pub book_id: BookId,
 }

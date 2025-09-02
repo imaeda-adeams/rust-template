@@ -45,7 +45,7 @@ pub struct UsersResponse {
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UserResponse {
-    pub id: UserId,
+    pub user_id: UserId,
     pub name: String,
     pub email: String,
     pub role: RoleName,
@@ -54,7 +54,7 @@ pub struct UserResponse {
 impl From<User> for UserResponse {
     fn from(user: User) -> Self {
         Self {
-            id: user.id,
+            user_id: user.user_id,
             name: user.name,
             email: user.email,
             role: RoleName::from(user.role),
@@ -160,7 +160,7 @@ pub struct BookOwner {
 impl From<kernel::model::user::BookOwner> for BookOwner {
     fn from(book_owner: kernel::model::user::BookOwner) -> Self {
         Self {
-            id: book_owner.id,
+            id: book_owner.user_id,
             name: book_owner.name,
         }
     }   

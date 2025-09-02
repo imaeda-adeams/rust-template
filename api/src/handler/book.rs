@@ -20,7 +20,7 @@ pub async fn register_book(
     req.validate()?;
     registry
         .book_repository()
-        .create(req.into(), user.id())
+        .create(req.into(), user.user_id())
         .await
         .map(|_| StatusCode::CREATED)
 }
@@ -43,12 +43,12 @@ pub async fn show_book_list(
 
 pub async fn show_book(
     _user: AuthorizedUser,
-    Path(id): Path<BookId>,
+    Path(book_id): Path<BookId>,
     State(registry): State<AppRegistry>,
 ) -> AppResult<Json<BookResponse>> {
     registry
         .book_repository()
-        .find_by_id(id)
+        .find_by_id(book_id)
         .await
         .and_then(|bc| match bc {
             Some(bc) => Ok(Json(bc.into())),
@@ -58,14 +58,14 @@ pub async fn show_book(
 
 pub async fn update_book (
     user: AuthorizedUser,
-    Path(id): Path<BookId>,
+    Path(book_id): Path<BookId>,
     State(registry): State<AppRegistry>,
     Json(req): Json<UpdateBookRequest>,
 ) -> AppResult<StatusCode> {
 
     req.validate()?;
 
-    let update_book = UpdateBookRequestWithIds::new(id, user.id(), req);
+    let update_book = UpdateBookRequestWithIds::new(book_id, user.user_id(), req);
     
     registry
         .book_repository()
@@ -76,13 +76,13 @@ pub async fn update_book (
 
 pub async fn delete_book (
     user: AuthorizedUser,
-    Path(id): Path<BookId>,
+    Path(book_id): Path<BookId>,
     State(registry): State<AppRegistry>,
 ) -> AppResult<StatusCode> {
     
     let delete_book = DeleteBook {
-        id,
-        requested_user: user.id(),
+        book_id,
+        requested_user: user.user_id(),
     };
     
     registry

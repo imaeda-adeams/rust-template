@@ -101,7 +101,7 @@ pub async fn change_password (
     
     registry
         .user_repository()
-        .update_password(UpdateUserPasswordRequestWithUserId::new(user.user.id, req).into())
+        .update_password(UpdateUserPasswordRequestWithUserId::new(user.user.user_id, req).into())
         .await?;
     
     Ok(StatusCode::OK)      

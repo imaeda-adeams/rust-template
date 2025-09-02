@@ -9,7 +9,7 @@ use kernel::model::{
 use crate::redis::model::{RedisKey, RedisValue};
 
 pub struct UserItem {
-    pub id: UserId,
+    pub user_id: UserId,
     pub password_hash: String,
 }
 
