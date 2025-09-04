@@ -4,8 +4,9 @@ use kernel::model::{
     id::{CheckoutId, BookId, UserId},
 };
 use serde::Serialize;
+use utoipa::ToSchema;
 
-#[derive(Serialize)]
+#[derive(Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct CheckoutsResponse {
     pub items: Vec<CheckoutResponse>,
@@ -19,7 +20,7 @@ impl From<Vec<Checkout>> for CheckoutsResponse {
     }   
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct CheckoutResponse {
     pub checkout_id: CheckoutId,
@@ -41,7 +42,7 @@ impl From<Checkout> for CheckoutResponse {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct CheckoutBookResponse {
     pub book_id: BookId,

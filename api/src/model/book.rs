@@ -4,11 +4,12 @@ use garde::Validate;
 use kernel::model::book::{Book, event::CreateBook, BookListOptions, Checkout};
 use kernel::model::id::{BookId, CheckoutId, UserId};
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 use kernel::model::book::event::UpdateBook;
 use kernel::model::list::PaginatedList;
 use crate::model::user::{BookOwner, CheckoutUser};
 
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Validate, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateBookRequest {
     #[garde(length(min = 1))]
@@ -41,7 +42,7 @@ impl From<CreateBookRequest> for CreateBook {
     }
 }
 
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Validate, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateBookRequest {
     #[garde(length(min=1))]
@@ -112,7 +113,7 @@ impl From<BookListQuery> for BookListOptions {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct BookResponse {
     pub book_id: BookId,
@@ -147,7 +148,7 @@ impl From<Book> for BookResponse {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct PaginatedBookResponse {
     pub total: i64,
@@ -168,7 +169,7 @@ impl From<PaginatedList<Book>> for PaginatedBookResponse {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct BookCheckoutResponse {
     pub checkout_id: CheckoutId,

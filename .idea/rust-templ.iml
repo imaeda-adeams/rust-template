@@ -8,6 +8,7 @@
       <sourceFolder url="file://$MODULE_DIR$/registry/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/shared/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/rstest-example/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/kernel/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>

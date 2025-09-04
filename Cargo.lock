@@ -1139,6 +1139,8 @@ dependencies = [
  "shared",
  "sqlx",
  "strum",
+ "utoipa",
+ "utoipa-redoc",
  "uuid",
 ]
 
@@ -1853,6 +1855,13 @@ dependencies = [
  "futures-timer",
  "futures-util",
  "rstest_macros",
+]
+
+[[package]]
+name = "rstest-example"
+version = "0.1.0"
+dependencies = [
+ "rstest",
 ]
 
 [[package]]

@@ -10,7 +10,7 @@ name = "app"
 path = "src/bin/app.rs"
 
 [workspace]
-members = ["api", "kernel", "adapter", "shared", "registry"]
+members = ["api", "kernel", "adapter", "shared", "registry", "rstest-example"]
 
 [workspace.package]
 edition = "2024"
@@ -27,9 +27,10 @@ async-trait = "0.1.88"
 anyhow = "1.0.99"
 axum = { version = "0.8.4", features = ["macros"] }
 derive-new = "0.7.0"
-utoipa = {version = "5.4.0", features = ["axum_extras", "uuid", "chrono"]}
-uuid = {version = "1.18.0", features = ["v4", "serde"]}
-chrono = {version = "0.4.41", default-features = false, features = ["serde"]}
+utoipa = { version = "5.4.0", features = ["axum_extras", "uuid", "chrono"] }
+utoipa-redoc = { version = "6.0.0", features = ["axum"] }
+uuid = { version = "1.18.0", features = ["v4", "serde"] }
+chrono = { version = "0.4.41", default-features = false, features = ["serde"] }
 serde = { version = "1.0.219", features = ["derive"] }
 secrecy = "0.10.3"
 sqlx = { version = "0.8.6", features = [
@@ -40,21 +41,21 @@ sqlx = { version = "0.8.6", features = [
     "postgres",
     "migrate"
 ] }
-strum = {version = "0.27.2", features = ["derive"]}
+strum = { version = "0.27.2", features = ["derive"] }
 thiserror = "2.0.14"
 tokio = { version = "1.47.1", features = ["full"] }
 mockall = "0.13.1"
-redis = {version = "0.32.5", features = ["tokio-rustls-comp"]}
+redis = { version = "0.32.5", features = ["tokio-rustls-comp"] }
 bcrypt = "0.17.0"
 itertools = "0.14.0"
 tower = "0.5.2"
-tracing = {version = "0.1.41", features = ["log"]}
-axum-extra = {version = "0.10.1", features = ["typed-header"]}
+tracing = { version = "0.1.41", features = ["log"] }
+axum-extra = { version = "0.10.1", features = ["typed-header"] }
 tokio-stream = "0.1.17"
-garde = {version = "0.22.0", features = ["derive", "email"]}
+garde = { version = "0.22.0", features = ["derive", "email"] }
 
 [dependencies]
-tower-http = {version = "0.6.6", features = ["cors", "trace"]}
+tower-http = { version = "0.6.6", features = ["cors", "trace"] }
 adapter.workspace = true
 api.workspace = true
 registry.workspace = true
@@ -62,13 +63,13 @@ shared.workspace = true
 anyhow.workspace = true
 axum.workspace = true
 utoipa.workspace = true
-utoipa-redoc = {version = "6.0.0", features = ["axum"]}
+utoipa-redoc.workspace = true
 tokio.workspace = true
 tracing.workspace = true
-tracing-subscriber = {version = "0.3.19", features = ["env-filter", "json"]}
+tracing-subscriber = { version = "0.3.19", features = ["env-filter", "json"] }
 opentelemetry = "0.30.0"
 tracing-opentelemetry = "0.31.0"
-opentelemetry-jaeger = {version = "0.22.0", features = ["rt-tokio"]}
+opentelemetry-jaeger = { version = "0.22.0", features = ["rt-tokio"] }
 
 [profile.dev.package.sqlx-macros]
 opt-level = 3

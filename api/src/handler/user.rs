@@ -16,6 +16,7 @@ use crate::{
     },
 };
 
+#[utoipa::path(post, path = "/users")]
 pub async fn register_user(
     user: AuthorizedUser,
     State(registry): State<AppRegistry>,
@@ -34,6 +35,7 @@ pub async fn register_user(
 }
 
 
+#[utoipa::path(get, path = "/users")]
 pub async fn list_users(
     _user: AuthorizedUser,
     State(registry): State<AppRegistry>,
@@ -50,6 +52,7 @@ pub async fn list_users(
     Ok(Json(UsersResponse{ items}))
 }
 
+#[utoipa::path(delete, path = "/users/{user_id}")]
 pub async fn delete_user(
     user: AuthorizedUser,
     Path(user_id): Path<UserId>,
@@ -68,6 +71,7 @@ pub async fn delete_user(
     Ok(StatusCode::OK)
 }
 
+#[utoipa::path(put, path = "/users/{user_id}/role")]
 pub async fn change_role (
     user: AuthorizedUser,
     Path(user_id): Path<UserId>,
@@ -87,10 +91,12 @@ pub async fn change_role (
     Ok(StatusCode::OK)
 }
 
+#[utoipa::path(get, path = "/users/me")]
 pub async fn get_current_user(user: AuthorizedUser) -> Json<UserResponse> {
     Json(UserResponse::from(user.user))
 }
 
+#[utoipa::path(put, path = "/users/me/password")]
 pub async fn change_password (
     user: AuthorizedUser,
     State(registry): State<AppRegistry>,

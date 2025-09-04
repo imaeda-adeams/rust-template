@@ -1,13 +1,14 @@
-use axum::{extract::State, http::StatusCode, Json};
+use axum::{Json, extract::State, http::StatusCode};
 use kernel::model::auth::event::CreateToken;
 use registry::AppRegistry;
 use shared::error::AppResult;
 
 use crate::{
     extractor::AuthorizedUser,
-    model::auth::{AccessTokenResponse, LoginRequest}
+    model::auth::{AccessTokenResponse, LoginRequest},
 };
 
+#[utoipa::path(post, path = "/login")]
 pub async fn login(
     State(registry): State<AppRegistry>,
     Json(req): Json<LoginRequest>,
@@ -20,18 +21,18 @@ pub async fn login(
         .auth_repository()
         .create_token(CreateToken::new(user_id))
         .await?;
-    
+
     Ok(Json(AccessTokenResponse {
         user_id,
-        access_token: access_token.0
+        access_token: access_token.0,
     }))
 }
 
-pub async  fn logout(
+#[utoipa::path(post, path = "/logout")]
+pub async fn logout(
     user: AuthorizedUser,
     State(registry): State<AppRegistry>,
 ) -> AppResult<StatusCode> {
-    
     registry
         .auth_repository()
         .delete_token(user.access_token)

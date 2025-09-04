@@ -10,8 +10,9 @@ use kernel::model::{
 };
 use serde::{Deserialize, Serialize};
 use strum::VariantNames;
+use utoipa::ToSchema;
 
-#[derive(Serialize, Deserialize, VariantNames)]
+#[derive(Serialize, Deserialize, VariantNames, ToSchema)]
 #[strum(serialize_all = "kebab-case")]
 pub enum RoleName {
     Admin,
@@ -42,7 +43,7 @@ pub struct UsersResponse {
     pub items: Vec<UserResponse>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct UserResponse {
     pub user_id: UserId,
@@ -62,7 +63,7 @@ impl From<User> for UserResponse {
     }
 }
 
-#[derive(Deserialize, Validate)]
+#[derive(Deserialize, Validate, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateUserRequest {
     #[garde(length(min = 1))]
@@ -84,7 +85,7 @@ impl From<CreateUserRequest> for CreateUser {
     }
 }
 
-#[derive(Deserialize, Validate)]
+#[derive(Deserialize, Validate, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateUserPasswordRequest {
 
@@ -121,7 +122,7 @@ impl From<UpdateUserPasswordRequestWithUserId> for UpdateUserPassword {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateUserRoleRequest {
     role: RoleName,   
@@ -150,7 +151,7 @@ impl From<UpdateUserRoleRequestWithUserId> for UpdateUserRole {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct BookOwner {
     pub id: UserId,
@@ -166,7 +167,7 @@ impl From<kernel::model::user::BookOwner> for BookOwner {
     }   
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct CheckoutUser {
     pub user_id: UserId,
